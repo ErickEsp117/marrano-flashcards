@@ -1,6 +1,6 @@
 import { LocalStorageFlashcardSetRepository } from '@/infrastructure/persistence/LocalStorageFlashcardSetRepository'
 import { PdfJsProcessorService } from '@/infrastructure/pdf/PdfJsProcessorService'
-import { GeminiAiGeneratorService } from '@/infrastructure/ai/GeminiAiGeneratorService'
+import { DeepSeekAiGeneratorService } from '@/infrastructure/ai/DeepSeekAiGeneratorService'
 import { GenerateFlashcardsFromPdf } from '@/application/use-cases/GenerateFlashcardsFromPdf'
 import { GetFlashcardSet } from '@/application/use-cases/GetFlashcardSet'
 import { GetAllFlashcardSets } from '@/application/use-cases/GetAllFlashcardSets'
@@ -14,10 +14,10 @@ import { getStoredApiKey } from '@/infrastructure/config/api-config'
 const flashcardSetRepository = new LocalStorageFlashcardSetRepository()
 const pdfProcessor = new PdfJsProcessorService()
 
-function createAiGenerator(): GeminiAiGeneratorService {
+function createAiGenerator(): DeepSeekAiGeneratorService {
   const apiKey = getStoredApiKey()
-  if (!apiKey) throw new Error('Gemini API key no configurada')
-  return new GeminiAiGeneratorService(apiKey)
+  if (!apiKey) throw new Error('DeepSeek API key no configurada')
+  return new DeepSeekAiGeneratorService(apiKey)
 }
 
 export const useCases = {

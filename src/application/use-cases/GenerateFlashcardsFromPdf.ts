@@ -2,7 +2,11 @@ import type { PdfProcessorService } from '@/domain/services/PdfProcessorService'
 import type { AiGeneratorService } from '@/domain/services/AiGeneratorService'
 import type { FlashcardSetRepository } from '@/domain/repositories/FlashcardSetRepository'
 import type { FlashcardSet } from '@/domain/entities/FlashcardSet'
+import type { Flashcard } from '@/domain/entities/Flashcard'
+import type { Category } from '@/domain/entities/Category'
 import { createSetId } from '@/domain/value-objects/SetId'
+
+const BATCH_SIZE = 3
 
 export type GenerationStage = 'extracting' | 'analyzing' | 'generating' | 'saving' | 'complete' | 'error'
 
@@ -21,23 +25,63 @@ export class GenerateFlashcardsFromPdf {
   async execute(input: GenerateFlashcardsInput): Promise<FlashcardSet> {
     const { file, onProgress } = input
 
+    const pageCount = await this.pdfProcessor.getPageCount(file)
+    if (pageCount > 15) {
+      throw new Error(`El PDF tiene ${pageCount} páginas. El límite es 15 páginas por documento.`)
+    }
+
     onProgress?.('extracting', `Extrayendo texto de ${file.name}...`)
     const pages = await this.pdfProcessor.extractPages(file)
 
-    onProgress?.('analyzing', `Analizando ${pages.length} paginas con IA...`)
-    const result = await this.aiGenerator.generateFromPages(
-      pages.map(p => ({ pageNumber: p.pageNumber, text: p.text, imageDataUrl: p.imageDataUrl }))
-    )
+    // Split pages into batches of BATCH_SIZE to avoid hitting AI output token limits
+    const batches: (typeof pages)[] = []
+    for (let i = 0; i < pages.length; i += BATCH_SIZE) {
+      batches.push(pages.slice(i, i + BATCH_SIZE))
+    }
 
-    onProgress?.('generating', `${result.flashcards.length} flashcards generadas en ${result.categories.length} categorias`)
+    let allFlashcards: Flashcard[] = []
+    let allCategories: Category[] = []
+    let suggestedTitle = ''
+    let suggestedSubtitle = ''
+
+    for (let i = 0; i < batches.length; i++) {
+      const batch = batches[i]!
+      const startPage = batch[0]!.pageNumber
+      const endPage = batch[batch.length - 1]!.pageNumber
+      onProgress?.(
+        'analyzing',
+        `Analizando páginas ${startPage}–${endPage} (lote ${i + 1} de ${batches.length})...`,
+      )
+
+      const result = await this.aiGenerator.generateFromPages(
+        batch.map(p => ({ pageNumber: p.pageNumber, text: p.text })),
+        allCategories,
+      )
+
+      if (i === 0) {
+        suggestedTitle = result.suggestedTitle
+        suggestedSubtitle = result.suggestedSubtitle
+      }
+
+      // Merge categories: only add categories not seen yet
+      for (const cat of result.categories) {
+        if (!allCategories.find(c => c.id === cat.id)) {
+          allCategories.push(cat)
+        }
+      }
+
+      allFlashcards = [...allFlashcards, ...result.flashcards]
+    }
+
+    onProgress?.('generating', `${allFlashcards.length} flashcards en ${allCategories.length} categorías`)
 
     const flashcardSet: FlashcardSet = {
       id: createSetId(),
-      title: result.suggestedTitle,
-      subtitle: result.suggestedSubtitle,
+      title: suggestedTitle,
+      subtitle: suggestedSubtitle,
       sourceFileName: file.name,
-      categories: result.categories,
-      flashcards: result.flashcards,
+      categories: allCategories,
+      flashcards: allFlashcards,
       createdAt: new Date().toISOString(),
       totalPages: pages.length,
     }

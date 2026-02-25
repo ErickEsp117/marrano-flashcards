@@ -22,7 +22,7 @@ function onInput(event: Event) {
 
 <template>
   <div class="api-key-input">
-    <label class="api-key-label">Gemini API Key</label>
+    <label class="api-key-label">DeepSeek API Key</label>
     <div class="api-key-row">
       <template v-if="hasKey">
         <input
@@ -40,7 +40,7 @@ function onInput(event: Event) {
         <input
           class="api-key-field"
           type="password"
-          placeholder="AIzaSy..."
+          placeholder="sk-..."
           :value="modelValue"
           @input="onInput"
         />
