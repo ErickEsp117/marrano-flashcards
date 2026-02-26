@@ -1,3 +1,4 @@
+/* ── Dark theme (default) ── */
 :root {
   --bg: #0a0e1a;
   --surface: #111827;
@@ -10,4 +11,33 @@
   --muted: #6b7a99;
   --border: rgba(0,229,160,0.15);
   --glow: rgba(0,229,160,0.08);
+  --danger-glow: rgba(255,107,107,0.10);
+  --cat-active-filter: brightness(1.5);
+  --deck-overlay-bg: rgba(10,14,26,0.97);
+  --score-yes-bg: rgba(0,229,160,0.15);
+  --score-yes-hover: rgba(0,229,160,0.28);
+  --score-no-bg: rgba(255,107,107,0.15);
+  --score-no-hover: rgba(255,107,107,0.28);
+}
+
+/* ── Light theme (pig-inspired) ── */
+:root[data-theme="light"] {
+  --bg: #fef0f5;
+  --surface: #ffffff;
+  --card-front: #ffffff;
+  --card-back: #fce4ee;
+  --accent: #d63679;
+  --accent2: #e8404a;
+  --accent3: #d97706;
+  --text: #1c0910;
+  --muted: #7a4055;
+  --border: rgba(214,54,121,0.20);
+  --glow: rgba(214,54,121,0.08);
+  --danger-glow: rgba(232,64,74,0.10);
+  --cat-active-filter: brightness(0.82);
+  --deck-overlay-bg: rgba(254,240,245,0.97);
+  --score-yes-bg: rgba(214,54,121,0.10);
+  --score-yes-hover: rgba(214,54,121,0.22);
+  --score-no-bg: rgba(232,64,74,0.10);
+  --score-no-hover: rgba(232,64,74,0.22);
 }

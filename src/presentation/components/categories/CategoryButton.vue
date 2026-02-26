@@ -38,7 +38,7 @@ defineEmits<{
 
 .cat-btn.active {
   opacity: 1;
-  filter: brightness(1.5);
+  filter: var(--cat-active-filter);
   box-shadow: 0 0 12px currentColor;
 }
 

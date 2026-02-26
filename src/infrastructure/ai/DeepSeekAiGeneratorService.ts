@@ -4,7 +4,7 @@ import type { Category } from '@/domain/entities/Category'
 import { DEFAULT_CATEGORY_COLORS } from '@/domain/entities/Category'
 import { createCardId } from '@/domain/value-objects/CardId'
 import { createHtmlContent } from '@/domain/value-objects/HtmlContent'
-import { FLASHCARD_GENERATION_PROMPT } from './prompts'
+import { SYSTEM_PROMPT } from './prompts'
 
 interface RawCategory {
   id: string
@@ -44,24 +44,27 @@ export class DeepSeekAiGeneratorService implements AiGeneratorService {
       .map(p => `--- PAGINA ${p.pageNumber} ---\n${p.text}`)
       .join('\n\n')
 
-    let prompt = FLASHCARD_GENERATION_PROMPT
+    let userMessage = 'CONTENIDO DEL PDF:\n' + combinedText
     if (existingCategories && existingCategories.length > 0) {
       const catList = existingCategories
         .map(c => `- id: "${c.id}", nombre: "${c.name}"`)
         .join('\n')
-      prompt += `\n\nCATEGORÍAS YA CREADAS EN LOTES ANTERIORES (reutiliza sus ids cuando el contenido corresponda, no crees duplicados):\n${catList}`
+      userMessage += `\n\nCATEGORÍAS YA CREADAS EN LOTES ANTERIORES (reutiliza sus ids cuando el contenido corresponda, no crees duplicados):\n${catList}`
     }
-
-    const userMessage = prompt + '\n\nCONTENIDO DEL PDF:\n' + combinedText
 
     const pageNums = pages.map(p => p.pageNumber).join(', ')
     console.debug(`[DeepSeek] Enviando lote — páginas: ${pageNums} | chars de entrada: ${userMessage.length}`)
 
     const completion = await this.client.chat.completions.create({
       model: 'deepseek-chat',
-      messages: [{ role: 'user', content: userMessage }],
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userMessage },
+      ],
       response_format: { type: 'json_object' },
       max_tokens: 8192,
+      temperature: 0.4,
+      top_p: 0.9,
     })
 
     const choice = completion.choices[0]!

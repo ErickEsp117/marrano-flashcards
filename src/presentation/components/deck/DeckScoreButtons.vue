@@ -35,22 +35,22 @@ defineEmits<{
 }
 
 .know-yes {
-  background: rgba(0,229,160,0.15);
+  background: var(--score-yes-bg);
   color: var(--accent);
   border: 1px solid var(--accent);
 }
 
 .know-yes:hover {
-  background: rgba(0,229,160,0.25);
+  background: var(--score-yes-hover);
 }
 
 .know-no {
-  background: rgba(255,107,107,0.15);
+  background: var(--score-no-bg);
   color: var(--accent2);
   border: 1px solid var(--accent2);
 }
 
 .know-no:hover {
-  background: rgba(255,107,107,0.25);
+  background: var(--score-no-hover);
 }
 </style>

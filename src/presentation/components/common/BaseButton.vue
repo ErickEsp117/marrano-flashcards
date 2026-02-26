@@ -27,7 +27,7 @@ defineEmits<{
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   padding: 0.4rem 0.9rem;
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid var(--border);
   background: transparent;
   color: var(--muted);
   border-radius: 2px;
@@ -51,7 +51,7 @@ defineEmits<{
 }
 
 .base-btn--accent:hover {
-  background: rgba(0,229,160,0.1);
+  background: var(--glow);
 }
 
 .base-btn--danger {
@@ -60,6 +60,6 @@ defineEmits<{
 }
 
 .base-btn--danger:hover {
-  background: rgba(255,107,107,0.1);
+  background: var(--danger-glow);
 }
 </style>

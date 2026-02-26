@@ -30,7 +30,7 @@ defineEmits<{
 }
 
 .nav-btn:hover:not(:disabled) {
-  background: rgba(0,229,160,0.1);
+  background: var(--glow);
 }
 
 .nav-btn:disabled {

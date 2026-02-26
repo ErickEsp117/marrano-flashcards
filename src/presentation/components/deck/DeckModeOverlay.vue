@@ -77,7 +77,7 @@ const currentCategoryName = computed(() => {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(10,14,26,0.97);
+  background: var(--deck-overlay-bg);
   z-index: 100;
   flex-direction: column;
   align-items: center;

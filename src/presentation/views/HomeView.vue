@@ -7,6 +7,7 @@ import ApiKeyInput from '@/presentation/components/upload/ApiKeyInput.vue'
 import PdfUploadZone from '@/presentation/components/upload/PdfUploadZone.vue'
 import UploadProgress from '@/presentation/components/upload/UploadProgress.vue'
 import UploadErrorMessage from '@/presentation/components/upload/UploadErrorMessage.vue'
+import FloatingPigs from '@/presentation/components/common/FloatingPigs.vue'
 
 const router = useRouter()
 const settingsStore = useSettingsStore()
@@ -37,6 +38,7 @@ function onRetry() {
 </script>
 
 <template>
+  <FloatingPigs />
   <div class="home">
     <header class="home-header">
       <h1 class="home-title">

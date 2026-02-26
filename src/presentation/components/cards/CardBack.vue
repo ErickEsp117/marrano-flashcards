@@ -27,7 +27,7 @@ defineProps<{
   flex-direction: column;
   overflow: hidden;
   background: var(--card-back);
-  border: 1px solid rgba(0,229,160,0.2);
+  border: 1px solid var(--border);
   transform: rotateY(180deg);
 }
 </style>

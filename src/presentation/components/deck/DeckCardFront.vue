@@ -23,7 +23,7 @@ defineProps<{
   padding: 2.5rem;
   display: flex;
   flex-direction: column;
-  background: #141e2e;
+  background: var(--card-front);
   border: 1px solid var(--border);
   align-items: center;
   justify-content: center;

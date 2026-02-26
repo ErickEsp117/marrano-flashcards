@@ -23,8 +23,8 @@ defineProps<{
   padding: 2.5rem;
   display: flex;
   flex-direction: column;
-  background: #0d1f1a;
-  border: 1px solid rgba(0,229,160,0.25);
+  background: var(--card-back);
+  border: 1px solid var(--border);
   transform: rotateY(180deg);
   overflow-y: auto;
 }
