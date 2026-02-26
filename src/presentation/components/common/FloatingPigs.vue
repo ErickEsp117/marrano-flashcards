@@ -56,7 +56,7 @@ function spawnParticles(x: number, y: number) {
       y,
       angle: (i / count) * 360,
       distance: rnd(40, 100),
-      emoji: BURST_EMOJIS[Math.floor(Math.random() * BURST_EMOJIS.length)],
+      emoji: BURST_EMOJIS[Math.floor(Math.random() * BURST_EMOJIS.length)]!,
     })
   }
   particles.value.push(...newOnes)
