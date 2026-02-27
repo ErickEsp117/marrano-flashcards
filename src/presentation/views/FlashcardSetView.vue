@@ -4,12 +4,14 @@ import { useRoute } from 'vue-router'
 import { toSetId } from '@/domain/value-objects/SetId'
 import { useFlashcardSetStore } from '@/presentation/stores/flashcardSetStore'
 import { useStudySessionStore } from '@/presentation/stores/studySessionStore'
+import { ref } from 'vue'
 import AppHeader from '@/presentation/components/header/AppHeader.vue'
 import CategoryNav from '@/presentation/components/categories/CategoryNav.vue'
 import ControlsBar from '@/presentation/components/controls/ControlsBar.vue'
 import FlashcardGrid from '@/presentation/components/cards/FlashcardGrid.vue'
 import DeckModeOverlay from '@/presentation/components/deck/DeckModeOverlay.vue'
 import LoadingSpinner from '@/presentation/components/common/LoadingSpinner.vue'
+import PdfExportModal from '@/presentation/components/export/PdfExportModal.vue'
 
 const route = useRoute()
 const store = useFlashcardSetStore()
@@ -45,6 +47,12 @@ function handleStudyMode() {
 function handleCardFlip(cardId: Parameters<typeof store.toggleFlip>[0]) {
   store.toggleFlip(cardId)
 }
+
+const showPdfExport = ref(false)
+
+function handleExportPdf() {
+  showPdfExport.value = true
+}
 </script>
 
 <template>
@@ -74,6 +82,7 @@ function handleCardFlip(cardId: Parameters<typeof store.toggleFlip>[0]) {
       @reset="handleReset"
       @shuffle="handleShuffle"
       @study-mode="handleStudyMode"
+      @export-pdf="handleExportPdf"
     />
 
     <FlashcardGrid
@@ -84,6 +93,14 @@ function handleCardFlip(cardId: Parameters<typeof store.toggleFlip>[0]) {
     />
 
     <DeckModeOverlay :categories="store.categories" />
+
+    <PdfExportModal
+      v-if="showPdfExport"
+      :cards="store.filteredCards"
+      :categories="store.categories"
+      :set="store.currentSet"
+      @close="showPdfExport = false"
+    />
   </template>
 </template>
 

@@ -14,6 +14,7 @@ defineEmits<{
   reset: []
   shuffle: []
   studyMode: []
+  exportPdf: []
 }>()
 </script>
 
@@ -27,6 +28,7 @@ defineEmits<{
       <BaseButton label="&#8634; Reiniciar" @click="$emit('reset')" />
       <BaseButton label="&#8644; Mezclar" @click="$emit('shuffle')" />
       <BaseButton label="&#9654; Modo estudio" variant="accent" @click="$emit('studyMode')" />
+      <BaseButton label="&#8595; Exportar PDF" @click="$emit('exportPdf')" />
     </div>
   </div>
 </template>
