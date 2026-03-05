@@ -3,11 +3,13 @@ import { computed } from 'vue'
 import type { Flashcard } from '@/domain/entities/Flashcard'
 import type { Category } from '@/domain/entities/Category'
 import type { FlashcardSet } from '@/domain/entities/FlashcardSet'
+import type { QuizQuestion } from '@/domain/entities/QuizQuestion'
 
 const props = defineProps<{
   cards: Flashcard[]
   categories: Category[]
   set: FlashcardSet
+  quizQuestions?: QuizQuestion[]
 }>()
 
 defineEmits<{ close: [] }>()
@@ -23,6 +25,7 @@ function getCategory(id: string): Category | undefined {
 }
 
 const totalCards = computed(() => props.cards.length)
+const hasQuiz = computed(() => (props.quizQuestions?.length ?? 0) > 0)
 const exportDate = computed(() => {
   return new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
 })
@@ -40,7 +43,7 @@ function handlePrint() {
       <div class="pdf-controls-left">
         <div class="pdf-meta">
           <span class="pdf-meta-title">{{ set.title }}</span>
-          <span class="pdf-meta-count">{{ totalCards }} tarjetas</span>
+          <span class="pdf-meta-count">{{ totalCards }} tarjetas<template v-if="hasQuiz"> · {{ quizQuestions!.length }} preguntas</template></span>
         </div>
       </div>
       <div class="pdf-controls-right">
@@ -77,6 +80,10 @@ function handlePrint() {
           <h1 class="pdf-cover-title">{{ set.title }}</h1>
           <div class="pdf-cover-stats">
             <span>{{ totalCards }} flashcards</span>
+            <template v-if="hasQuiz">
+              <span class="pdf-cover-dot">·</span>
+              <span>{{ quizQuestions!.length }} preguntas</span>
+            </template>
             <span class="pdf-cover-dot">·</span>
             <span>{{ categories.length }} categorías</span>
             <span class="pdf-cover-dot">·</span>
@@ -135,6 +142,56 @@ function handlePrint() {
           </div>
         </div>
       </div>
+
+      <!-- Sección de cuestionario -->
+      <template v-if="hasQuiz">
+        <div class="pdf-section-header">
+          <div class="pdf-section-accent"></div>
+          <div class="pdf-section-body">
+            <h2 class="pdf-section-title">Cuestionario</h2>
+            <div class="pdf-section-subtitle">{{ quizQuestions!.length }} preguntas de opcion multiple</div>
+          </div>
+        </div>
+
+        <div class="pdf-quiz-grid">
+          <div
+            v-for="(q, i) in quizQuestions"
+            :key="q.id"
+            class="pdf-quiz-card"
+            :style="{ borderColor: getCategory(q.categoryId)?.color.border ?? 'rgba(0,229,160,0.15)' }"
+          >
+            <div
+              class="pdf-card-bar"
+              :style="{ background: getCategory(q.categoryId)?.color.gradient ?? 'linear-gradient(90deg,#00e5a0,#00b8d9)' }"
+            ></div>
+            <div class="pdf-card-header">
+              <span
+                class="pdf-card-cat"
+                :style="{ color: getCategory(q.categoryId)?.color.primary ?? '#00e5a0' }"
+              >{{ getCategory(q.categoryId)?.name ?? '—' }}</span>
+              <span class="pdf-card-num">Q{{ i + 1 }}</span>
+            </div>
+            <div class="pdf-quiz-question">{{ q.question }}</div>
+            <div class="pdf-quiz-options">
+              <div v-for="opt in q.options" :key="opt.label" class="pdf-quiz-option">
+                <span class="pdf-quiz-option-label">{{ opt.label }})</span>
+                <span class="pdf-quiz-option-text">{{ opt.text }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pdf-answer-key">
+          <div class="pdf-answer-key-bar"></div>
+          <h3 class="pdf-answer-key-title">Clave de respuestas</h3>
+          <div class="pdf-answer-key-grid">
+            <div v-for="(q, i) in quizQuestions" :key="q.id" class="pdf-answer-key-item">
+              <span class="pdf-answer-key-num">Q{{ i + 1 }}:</span>
+              <span class="pdf-answer-key-answer">{{ q.correctOptionLabel }}</span>
+            </div>
+          </div>
+        </div>
+      </template>
 
       <!-- Footer: oculto en vista previa, visible en impresión -->
       <div class="pdf-footer print-only">
@@ -506,6 +563,156 @@ function handlePrint() {
   width: 100%;
 }
 
+/* ── Sección de cuestionario ── */
+.pdf-section-header {
+  background: var(--pdf-card-front);
+  border: 1px solid var(--pdf-border);
+  border-radius: 8px;
+  overflow: clip;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.pdf-section-accent {
+  height: 3px;
+  background: linear-gradient(90deg, #ffd166, #ff6b6b, #c084fc);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pdf-section-body {
+  padding: 1.5rem 2rem;
+}
+
+.pdf-section-title {
+  font-family: var(--pdf-font-sans);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--pdf-text);
+  margin: 0;
+}
+
+.pdf-section-subtitle {
+  font-family: var(--pdf-font);
+  font-size: 0.72rem;
+  color: var(--pdf-muted);
+  margin-top: 0.25rem;
+}
+
+.pdf-quiz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.pdf-quiz-card {
+  background: var(--pdf-card-front);
+  border: 1px solid;
+  border-radius: 6px;
+  overflow: hidden;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pdf-quiz-question {
+  font-family: var(--pdf-font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--pdf-text);
+  line-height: 1.5;
+  padding: 0.4rem 0.9rem;
+}
+
+.pdf-quiz-options {
+  padding: 0.4rem 0.9rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.pdf-quiz-option {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-family: var(--pdf-font-sans);
+  font-size: 0.78rem;
+  color: var(--pdf-text);
+  opacity: 0.9;
+}
+
+.pdf-quiz-option-label {
+  font-family: var(--pdf-font);
+  font-weight: 600;
+  color: var(--pdf-accent);
+  min-width: 1.5rem;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* ── Clave de respuestas ── */
+.pdf-answer-key {
+  background: var(--pdf-card-front);
+  border: 1px solid var(--pdf-border);
+  border-radius: 6px;
+  overflow: clip;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pdf-answer-key-bar {
+  height: 3px;
+  background: linear-gradient(90deg, #ffd166, #ff6b6b);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pdf-answer-key-title {
+  font-family: var(--pdf-font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--pdf-accent);
+  margin: 0;
+  padding: 1rem 1.5rem 0.5rem;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.pdf-answer-key-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 0 1.5rem 1rem;
+}
+
+.pdf-answer-key-item {
+  font-family: var(--pdf-font);
+  font-size: 0.72rem;
+  display: flex;
+  gap: 0.3rem;
+}
+
+.pdf-answer-key-num {
+  color: var(--pdf-muted);
+}
+
+.pdf-answer-key-answer {
+  color: var(--pdf-accent);
+  font-weight: 600;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
 /* ── Elementos sólo visibles en impresión ── */
 .print-only {
   display: none;
@@ -592,6 +799,30 @@ function handlePrint() {
 
   .pdf-card-answer-section .pdf-card-answer {
     background: transparent !important;
+  }
+
+  /* Quiz section */
+  .pdf-section-header {
+    background: #141e2e !important;
+    max-width: 100% !important;
+  }
+
+  .pdf-quiz-grid {
+    max-width: 100% !important;
+    gap: 0.5rem !important;
+  }
+
+  .pdf-quiz-card {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    background: #141e2e !important;
+  }
+
+  .pdf-answer-key {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    background: #141e2e !important;
+    max-width: 100% !important;
   }
 
   /* Footer visible */

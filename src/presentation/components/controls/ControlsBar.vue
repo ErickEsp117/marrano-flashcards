@@ -8,12 +8,14 @@ defineProps<{
   totalCount: number
   seenCount: number
   progressPercent: number
+  hasQuiz: boolean
 }>()
 
 defineEmits<{
   reset: []
   shuffle: []
   studyMode: []
+  quizMode: []
   exportPdf: []
 }>()
 </script>
@@ -28,6 +30,7 @@ defineEmits<{
       <BaseButton label="&#8634; Reiniciar" @click="$emit('reset')" />
       <BaseButton label="&#8644; Mezclar" @click="$emit('shuffle')" />
       <BaseButton label="&#9654; Modo estudio" variant="accent" @click="$emit('studyMode')" />
+      <BaseButton v-if="hasQuiz" label="&#9999; Cuestionario" variant="accent" @click="$emit('quizMode')" />
       <BaseButton label="&#8595; Exportar PDF" @click="$emit('exportPdf')" />
     </div>
   </div>

@@ -4,6 +4,7 @@ import type { FlashcardSetRepository } from '@/domain/repositories/FlashcardSetR
 import type { FlashcardSet } from '@/domain/entities/FlashcardSet'
 import type { Flashcard } from '@/domain/entities/Flashcard'
 import type { Category } from '@/domain/entities/Category'
+import type { QuizQuestion } from '@/domain/entities/QuizQuestion'
 import { createSetId } from '@/domain/value-objects/SetId'
 
 const BATCH_SIZE = 3
@@ -41,6 +42,7 @@ export class GenerateFlashcardsFromPdf {
 
     let allFlashcards: Flashcard[] = []
     let allCategories: Category[] = []
+    let allQuizQuestions: QuizQuestion[] = []
     let suggestedTitle = ''
     let suggestedSubtitle = ''
 
@@ -71,9 +73,10 @@ export class GenerateFlashcardsFromPdf {
       }
 
       allFlashcards = [...allFlashcards, ...result.flashcards]
+      allQuizQuestions = [...allQuizQuestions, ...result.quizQuestions]
     }
 
-    onProgress?.('generating', `${allFlashcards.length} flashcards en ${allCategories.length} categorías`)
+    onProgress?.('generating', `${allFlashcards.length} flashcards + ${allQuizQuestions.length} preguntas de quiz en ${allCategories.length} categorías`)
 
     const flashcardSet: FlashcardSet = {
       id: createSetId(),
@@ -82,6 +85,7 @@ export class GenerateFlashcardsFromPdf {
       sourceFileName: file.name,
       categories: allCategories,
       flashcards: allFlashcards,
+      quizQuestions: allQuizQuestions,
       createdAt: new Date().toISOString(),
       totalPages: pages.length,
     }

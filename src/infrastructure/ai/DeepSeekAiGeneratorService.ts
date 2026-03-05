@@ -2,7 +2,9 @@ import OpenAI from 'openai'
 import type { AiGeneratorService, AiFlashcardResult } from '@/domain/services/AiGeneratorService'
 import type { Category } from '@/domain/entities/Category'
 import { DEFAULT_CATEGORY_COLORS } from '@/domain/entities/Category'
+import type { QuizOption } from '@/domain/entities/QuizQuestion'
 import { createCardId } from '@/domain/value-objects/CardId'
+import { createQuestionId } from '@/domain/value-objects/QuestionId'
 import { createHtmlContent } from '@/domain/value-objects/HtmlContent'
 import { SYSTEM_PROMPT } from './prompts'
 
@@ -18,11 +20,25 @@ interface RawFlashcard {
   sourcePageNumber: number
 }
 
+interface RawQuizOption {
+  label: 'A' | 'B' | 'C' | 'D'
+  text: string
+}
+
+interface RawQuizQuestion {
+  question: string
+  options: RawQuizOption[]
+  correctOptionLabel: 'A' | 'B' | 'C' | 'D'
+  categoryId: string
+  sourcePageNumber: number
+}
+
 interface DeepSeekParsedResponse {
   title: string
   subtitle: string
   categories: RawCategory[]
   flashcards: RawFlashcard[]
+  quizQuestions?: RawQuizQuestion[]
 }
 
 export class DeepSeekAiGeneratorService implements AiGeneratorService {
@@ -117,9 +133,21 @@ export class DeepSeekAiGeneratorService implements AiGeneratorService {
       sourcePageNumber: fc.sourcePageNumber,
     }))
 
+    const quizQuestions = (parsed.quizQuestions ?? [])
+      .filter(rq => rq.options?.length === 4)
+      .map(rq => ({
+        id: createQuestionId(),
+        question: rq.question,
+        options: rq.options as [QuizOption, QuizOption, QuizOption, QuizOption],
+        correctOptionLabel: rq.correctOptionLabel,
+        categoryId: rq.categoryId,
+        sourcePageNumber: rq.sourcePageNumber,
+      }))
+
     return {
       flashcards,
       categories,
+      quizQuestions,
       suggestedTitle: parsed.title,
       suggestedSubtitle: parsed.subtitle,
     }

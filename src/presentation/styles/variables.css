@@ -18,6 +18,13 @@
   --score-yes-hover: rgba(0,229,160,0.28);
   --score-no-bg: rgba(255,107,107,0.15);
   --score-no-hover: rgba(255,107,107,0.28);
+  --quiz-option-bg: rgba(0,229,160,0.05);
+  --quiz-option-hover: rgba(0,229,160,0.12);
+  --quiz-option-border: rgba(0,229,160,0.15);
+  --quiz-correct-bg: rgba(0,229,160,0.20);
+  --quiz-correct-border: rgba(0,229,160,0.5);
+  --quiz-wrong-bg: rgba(255,107,107,0.15);
+  --quiz-wrong-border: rgba(255,107,107,0.5);
 }
 
 /* ── Light theme (pig-inspired) ── */
@@ -40,4 +47,11 @@
   --score-yes-hover: rgba(214,54,121,0.22);
   --score-no-bg: rgba(232,64,74,0.10);
   --score-no-hover: rgba(232,64,74,0.22);
+  --quiz-option-bg: rgba(214,54,121,0.04);
+  --quiz-option-hover: rgba(214,54,121,0.10);
+  --quiz-option-border: rgba(214,54,121,0.15);
+  --quiz-correct-bg: rgba(0,180,100,0.15);
+  --quiz-correct-border: rgba(0,180,100,0.5);
+  --quiz-wrong-bg: rgba(232,64,74,0.12);
+  --quiz-wrong-border: rgba(232,64,74,0.5);
 }

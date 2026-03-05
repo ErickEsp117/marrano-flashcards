@@ -9,6 +9,8 @@ import { FilterFlashcardsByCategory } from '@/application/use-cases/FilterFlashc
 import { ShuffleFlashcards } from '@/application/use-cases/ShuffleFlashcards'
 import { StartStudySession } from '@/application/use-cases/StartStudySession'
 import { ScoreCard } from '@/application/use-cases/ScoreCard'
+import { StartQuizSession } from '@/application/use-cases/StartQuizSession'
+import { AnswerQuizQuestion } from '@/application/use-cases/AnswerQuizQuestion'
 import { getStoredApiKey } from '@/infrastructure/config/api-config'
 
 const flashcardSetRepository = new LocalStorageFlashcardSetRepository()
@@ -30,4 +32,6 @@ export const useCases = {
   shuffleFlashcards: () => new ShuffleFlashcards(),
   startStudySession: () => new StartStudySession(),
   scoreCard: () => new ScoreCard(),
+  startQuizSession: () => new StartQuizSession(),
+  answerQuizQuestion: () => new AnswerQuizQuestion(),
 }

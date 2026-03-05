@@ -1,21 +1,28 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { toSetId } from '@/domain/value-objects/SetId'
 import { useFlashcardSetStore } from '@/presentation/stores/flashcardSetStore'
 import { useStudySessionStore } from '@/presentation/stores/studySessionStore'
+import { useQuizSessionStore } from '@/presentation/stores/quizSessionStore'
 import { ref } from 'vue'
 import AppHeader from '@/presentation/components/header/AppHeader.vue'
 import CategoryNav from '@/presentation/components/categories/CategoryNav.vue'
 import ControlsBar from '@/presentation/components/controls/ControlsBar.vue'
 import FlashcardGrid from '@/presentation/components/cards/FlashcardGrid.vue'
 import DeckModeOverlay from '@/presentation/components/deck/DeckModeOverlay.vue'
+import QuizModeOverlay from '@/presentation/components/quiz/QuizModeOverlay.vue'
 import LoadingSpinner from '@/presentation/components/common/LoadingSpinner.vue'
 import PdfExportModal from '@/presentation/components/export/PdfExportModal.vue'
 
 const route = useRoute()
 const store = useFlashcardSetStore()
 const studyStore = useStudySessionStore()
+const quizStore = useQuizSessionStore()
+
+const hasQuiz = computed(() =>
+  (store.currentSet?.quizQuestions?.length ?? 0) > 0
+)
 
 onMounted(async () => {
   const id = route.params.id as string
@@ -42,6 +49,12 @@ function handleShuffle() {
 
 function handleStudyMode() {
   studyStore.start(store.filteredCards)
+}
+
+function handleQuizMode() {
+  if (store.currentSet?.quizQuestions) {
+    quizStore.start(store.currentSet.quizQuestions)
+  }
 }
 
 function handleCardFlip(cardId: Parameters<typeof store.toggleFlip>[0]) {
@@ -79,9 +92,11 @@ function handleExportPdf() {
       :total-count="store.totalCards"
       :seen-count="store.seenCards"
       :progress-percent="store.progressPercent"
+      :has-quiz="hasQuiz"
       @reset="handleReset"
       @shuffle="handleShuffle"
       @study-mode="handleStudyMode"
+      @quiz-mode="handleQuizMode"
       @export-pdf="handleExportPdf"
     />
 
@@ -93,12 +108,14 @@ function handleExportPdf() {
     />
 
     <DeckModeOverlay :categories="store.categories" />
+    <QuizModeOverlay :categories="store.categories" />
 
     <PdfExportModal
       v-if="showPdfExport"
       :cards="store.filteredCards"
       :categories="store.categories"
       :set="store.currentSet"
+      :quiz-questions="store.currentSet.quizQuestions"
       @close="showPdfExport = false"
     />
   </template>
