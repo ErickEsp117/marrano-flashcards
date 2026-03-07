@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '@/presentation/stores/settingsStore'
 import { useUploadStore } from '@/presentation/stores/uploadStore'
+import { useFlashcardSetStore } from '@/presentation/stores/flashcardSetStore'
 import { usePdfUpload } from '@/presentation/composables/usePdfUpload'
 import ApiKeyInput from '@/presentation/components/upload/ApiKeyInput.vue'
 import PdfUploadZone from '@/presentation/components/upload/PdfUploadZone.vue'
@@ -12,14 +13,30 @@ import FloatingPigs from '@/presentation/components/common/FloatingPigs.vue'
 const router = useRouter()
 const settingsStore = useSettingsStore()
 const uploadStore = useUploadStore()
+const flashcardSetStore = useFlashcardSetStore()
 const { isDragging, selectedFile, validationError, handleFile, handleDrop, handleDragOver, handleDragLeave } = usePdfUpload()
+
+let hasNavigated = false
 
 async function onFileSelected(file: File) {
   handleFile(file)
   if (validationError.value) return
+  hasNavigated = false
   try {
-    const set = await uploadStore.processFile(file)
-    router.push({ name: 'flashcard-set', params: { id: set.id } })
+    await uploadStore.processFile(file, {
+      onFirstBatchReady: (set) => {
+        // Navigate immediately when first batch is ready
+        if (!hasNavigated) {
+          hasNavigated = true
+          flashcardSetStore.setCurrentSet(set)
+          router.push({ name: 'flashcard-set', params: { id: set.id } })
+        }
+      },
+      onBatchUpdate: (set) => {
+        // Update the store with new flashcards from subsequent batches
+        flashcardSetStore.setCurrentSet(set)
+      },
+    })
   } catch {
     // Error is handled in uploadStore
   }

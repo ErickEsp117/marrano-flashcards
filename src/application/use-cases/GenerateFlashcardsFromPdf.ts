@@ -14,6 +14,10 @@ export type GenerationStage = 'extracting' | 'analyzing' | 'generating' | 'savin
 export interface GenerateFlashcardsInput {
   file: File
   onProgress?: (stage: GenerationStage, detail: string) => void
+  /** Called after the first batch is ready, so UI can navigate immediately */
+  onFirstBatchReady?: (set: FlashcardSet) => void
+  /** Called after each subsequent batch with the updated set */
+  onBatchUpdate?: (set: FlashcardSet) => void
 }
 
 export class GenerateFlashcardsFromPdf {
@@ -24,7 +28,7 @@ export class GenerateFlashcardsFromPdf {
   ) {}
 
   async execute(input: GenerateFlashcardsInput): Promise<FlashcardSet> {
-    const { file, onProgress } = input
+    const { file, onProgress, onFirstBatchReady, onBatchUpdate } = input
 
     const pageCount = await this.pdfProcessor.getPageCount(file)
     if (pageCount > 15) {
@@ -45,6 +49,7 @@ export class GenerateFlashcardsFromPdf {
     let allQuizQuestions: QuizQuestion[] = []
     let suggestedTitle = ''
     let suggestedSubtitle = ''
+    const setId = createSetId()
 
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i]!
@@ -74,12 +79,37 @@ export class GenerateFlashcardsFromPdf {
 
       allFlashcards = [...allFlashcards, ...result.flashcards]
       allQuizQuestions = [...allQuizQuestions, ...result.quizQuestions]
+
+      // Build intermediate set after each batch
+      const currentSet: FlashcardSet = {
+        id: setId,
+        title: suggestedTitle,
+        subtitle: suggestedSubtitle,
+        sourceFileName: file.name,
+        categories: [...allCategories],
+        flashcards: [...allFlashcards],
+        quizQuestions: [...allQuizQuestions],
+        createdAt: new Date().toISOString(),
+        totalPages: pages.length,
+      }
+
+      // Save after each batch so data is persisted progressively
+      await this.setRepository.save(currentSet)
+
+      if (i === 0) {
+        // First batch ready — notify so UI can navigate immediately
+        onFirstBatchReady?.(currentSet)
+        onProgress?.('generating', `${allFlashcards.length} flashcards listas — generando más en segundo plano...`)
+      } else {
+        // Subsequent batch — notify so UI can update live
+        onBatchUpdate?.(currentSet)
+        onProgress?.('generating', `${allFlashcards.length} flashcards + ${allQuizQuestions.length} preguntas de quiz en ${allCategories.length} categorías`)
+      }
     }
 
-    onProgress?.('generating', `${allFlashcards.length} flashcards + ${allQuizQuestions.length} preguntas de quiz en ${allCategories.length} categorías`)
-
-    const flashcardSet: FlashcardSet = {
-      id: createSetId(),
+    // Final set is already saved, return it
+    const finalSet: FlashcardSet = {
+      id: setId,
       title: suggestedTitle,
       subtitle: suggestedSubtitle,
       sourceFileName: file.name,
@@ -90,10 +120,7 @@ export class GenerateFlashcardsFromPdf {
       totalPages: pages.length,
     }
 
-    onProgress?.('saving', 'Guardando...')
-    await this.setRepository.save(flashcardSet)
-
-    onProgress?.('complete', 'Listo!')
-    return flashcardSet
+    onProgress?.('complete', '¡Todas las flashcards generadas!')
+    return finalSet
   }
 }

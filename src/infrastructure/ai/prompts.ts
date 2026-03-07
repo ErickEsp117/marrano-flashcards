@@ -13,7 +13,7 @@ INSTRUCCIONES:
 2. Genera TODAS las flashcards necesarias para cubrir el contenido sin omitir conceptos, datos o ideas relevantes presentes en el texto. No hay límite máximo: para documentos densos esto puede ser 50, 80 o más tarjetas.
 3. Auto-categoriza cada flashcard en categorías detectadas del contenido.
 4. Sugiere un título y subtítulo basados en el contenido del texto.
-5. A partir de las flashcards generadas, selecciona aproximadamente el 50% para convertirlas en preguntas de cuestionario tipo test (opcion multiple). Cada pregunta debe tener exactamente 4 opciones (A, B, C, D) donde solo 1 es correcta.
+5. A partir de las flashcards generadas, selecciona aproximadamente el 65% para convertirlas en preguntas de cuestionario tipo test (opcion multiple). Genera la mayor cantidad posible de preguntas de quiz. Cada pregunta debe tener exactamente 4 opciones (A, B, C, D) donde solo 1 es correcta.
 6. Las 3 opciones incorrectas (distractores) deben ser plausibles y basadas en el contenido del texto, NO inventadas. Deben provenir de datos, conceptos o terminos que realmente aparezcan en el texto pero que NO son la respuesta correcta a esa pregunta especifica.
 7. Las opciones deben estar barajadas — la respuesta correcta NO debe estar siempre en la misma posicion.
 8. NO repitas la misma pregunta de forma identica entre flashcards y quizQuestions; reformula la pregunta del quiz para que sea diferente.
