@@ -13,7 +13,7 @@ export class LocalStorageFlashcardSetRepository implements FlashcardSetRepositor
     localStorage.setItem(STORAGE_KEYS.FLASHCARD_SETS, JSON.stringify(sets))
   }
 
-  async save(set: FlashcardSet): Promise<void> {
+  async save(set: FlashcardSet): Promise<FlashcardSet> {
     const sets = this.getStore()
     const index = sets.findIndex(s => s.id === set.id)
     if (index >= 0) {
@@ -22,6 +22,7 @@ export class LocalStorageFlashcardSetRepository implements FlashcardSetRepositor
       sets.push(set)
     }
     this.setStore(sets)
+    return set
   }
 
   async getById(id: SetId): Promise<FlashcardSet | null> {

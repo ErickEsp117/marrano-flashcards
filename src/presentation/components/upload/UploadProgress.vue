@@ -8,11 +8,9 @@ defineProps<{
 }>()
 
 const stageLabels: Record<string, string> = {
-  extracting: 'Extrayendo PDF...',
-  analyzing: 'Analizando con IA...',
+  uploading: 'Subiendo PDF...',
   generating: 'Generando flashcards...',
-  saving: 'Guardando...',
-  complete: 'Completado!',
+  complete: '¡Completado!',
   error: 'Error',
 }
 </script>
